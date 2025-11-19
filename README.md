@@ -35,5 +35,36 @@ Atualmente, o projeto possui a configuração via Docker para os serviços de in
 
 Para iniciar os serviços, execute na raiz do projeto:
 
+## 🐍 Rodando o Python (Producer)
+
 ```bash
 docker compose up -d
+
+# 1. Entre na pasta
+cd weather-collector
+
+# 2. Crie e ative o ambiente virtual (Recomendado)
+python3 -m venv venv
+source venv/bin/activate  # Linux/Mac/WSL
+# .\venv\Scripts\activate # Windows
+
+# 3. Instale as dependências
+pip install -r requirements.txt
+
+# 4. Execute
+python main.py
+ ```
+
+
+## 🐹  Rodando o go (Cosumer)
+
+# 1. Entre na pasta (Em um novo terminal)
+ ```bash
+cd weather-worker
+
+# 2. Baixe as dependências
+go mod tidy
+
+# 3. Execute
+go run main.go
+```
