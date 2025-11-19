@@ -1,0 +1,2 @@
+# api/.env
+MONGO_URI=mongodb://admin:password123@localhost:27017/weather_db?authSource=admin

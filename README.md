@@ -35,6 +35,10 @@ Atualmente, o projeto possui a configuração via Docker para os serviços de in
 
 Para iniciar os serviços, execute na raiz do projeto:
 
+```bash
+docker compose up -d
+```
+
 ## 🐍 Rodando o Python (Producer)
 
 ```bash
@@ -68,3 +72,22 @@ go mod tidy
 # 3. Execute
 go run main.go
 ```
+
+### 6. Rodando a API (NestJS) 🦁
+
+O backend é responsável por receber os dados tratados do Worker, persistir no MongoDB e expor endpoints para o Frontend.
+
+#### 📋 Configuração
+
+1. **Acesse a pasta da API:**
+   ```bash
+   cd api
+  ```
+  npm install
+   ```bash
+   npm install
+  ```
+   ```bash
+   npm run start:dev
+  ```
+  
