@@ -83,7 +83,6 @@ O backend é responsável por receber os dados tratados do Worker, persistir no 
    ```bash
    cd api
   ```
-  npm install
    ```bash
    npm install
   ```
