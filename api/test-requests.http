@@ -1,0 +1,19 @@
+### 1. Listar todos os dados (Para ver se o banco tem algo)
+GET http://localhost:3000/weather
+
+### 2. Simular o envio de um dado (Caso seu Python esteja desligado)
+# Use isso para garantir que existe um "último registro" para a IA ler
+POST http://localhost:3000/weather
+Content-Type: application/json
+
+{
+    "temperature": 32.5,
+    "humidity": 45,
+    "precipitation": 0,
+    "windSpeed": 12.5,
+    "weatherCode": 0
+}
+
+### 3. 🧠 O TESTE DE FOGO: Gerar Insight com IA
+# Isso vai pegar o último dado do banco e mandar pro Gemini
+GET http://localhost:3000/weather/insight
