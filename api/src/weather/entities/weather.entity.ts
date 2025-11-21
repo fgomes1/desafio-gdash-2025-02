@@ -3,7 +3,7 @@ import { HydratedDocument } from 'mongoose';
 
 export type WeatherDocument = HydratedDocument<Weather>;
 
-@Schema({ timestamps: true }) // Cria created_at e updated_at automático
+@Schema({ timestamps: true })
 export class Weather {
   @Prop()
   temperature: number;
@@ -13,6 +13,12 @@ export class Weather {
 
   @Prop()
   precipitation: number;
+
+  @Prop()
+  windSpeed: number;
+
+  @Prop()
+  weatherCode: number;
 }
 
 export const WeatherSchema = SchemaFactory.createForClass(Weather);

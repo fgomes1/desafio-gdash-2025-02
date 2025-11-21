@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { CloudRain, Droplets, Thermometer, CalendarClock, RefreshCw } from 'lucide-react';
+import { CloudRain, Droplets, Thermometer, CalendarClock, RefreshCw, Wind } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -10,6 +10,8 @@ interface WeatherLog {
   temperature: number;
   humidity: number;
   precipitation: number;
+  windSpeed: number;
+  weatherCode: number;
   createdAt: string;
 }
 
@@ -49,7 +51,7 @@ function App() {
           </h1>
           <p className="text-gdash-gray mt-1">Monitoramento Climático em Tempo Real</p>
         </div>
-        <button 
+        <button
           onClick={fetchWeather}
           className="flex items-center gap-2 bg-gdash-card hover:bg-slate-700 border border-slate-700 px-4 py-2 rounded-lg transition-all text-sm font-medium"
         >
@@ -60,10 +62,10 @@ function App() {
 
       {/* Grid de Cards */}
       <main className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        
+
         {logs.map((log) => (
-          <div 
-            key={log._id} 
+          <div
+            key={log._id}
             className="bg-gdash-card border-l-4 border-gdash-primary rounded-r-xl p-6 shadow-lg hover:translate-y-[-4px] transition-transform duration-300"
           >
             {/* Data e Hora */}
@@ -101,6 +103,15 @@ function App() {
                 <div>
                   <p className="text-xs text-slate-400">Precipitação</p>
                   <p className="font-semibold">{log.precipitation}mm</p>
+                </div>
+              </div>
+
+              {/* Vento (Novo) */}
+              <div className="flex items-center gap-2 bg-slate-800/50 p-3 rounded-lg col-span-2 mt-2">
+                <Wind size={18} className="text-gdash-primary" />
+                <div className="flex justify-between w-full items-center">
+                  <p className="text-xs text-slate-400">Vento</p>
+                  <p className="font-semibold">{log.windSpeed} km/h</p>
                 </div>
               </div>
             </div>
