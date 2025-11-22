@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, ValidationPipe, Request, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('users')
 @Controller('users')
@@ -12,8 +14,8 @@ export class UsersController {
 
     @Post()
     @ApiOperation({
-        summary: 'Criar novo usuário',
-        description: 'Endpoint público para registro de novos usuários'
+        summary: 'Criar novo usuário (Registro)',
+        description: 'Endpoint público para registro de novos usuários. Não requer autenticação.'
     })
     @ApiBody({ type: CreateUserDto })
     @ApiResponse({
@@ -39,11 +41,12 @@ export class UsersController {
     }
 
     @Get()
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
     @ApiBearerAuth('JWT-auth')
     @ApiOperation({
-        summary: 'Listar todos os usuários',
-        description: 'Retorna lista de todos os usuários cadastrados. Requer autenticação.'
+        summary: 'Listar todos os usuários (ADMIN)',
+        description: 'Retorna lista de todos os usuários. APENAS ADMINISTRADORES podem acessar.'
     })
     @ApiResponse({
         status: 200,
@@ -63,6 +66,10 @@ export class UsersController {
         status: 401,
         description: 'Não autorizado - Token inválido ou ausente'
     })
+    @ApiResponse({
+        status: 403,
+        description: 'Acesso negado - Apenas administradores'
+    })
     findAll() {
         return this.usersService.findAll();
     }
@@ -72,7 +79,7 @@ export class UsersController {
     @ApiBearerAuth('JWT-auth')
     @ApiOperation({
         summary: 'Buscar usuário por ID',
-        description: 'Retorna dados de um usuário específico. Requer autenticação.'
+        description: 'Retorna dados de um usuário específico. Usuários podem ver apenas seu próprio perfil. Admins podem ver qualquer perfil.'
     })
     @ApiParam({
         name: 'id',
@@ -94,6 +101,10 @@ export class UsersController {
         }
     })
     @ApiResponse({
+        status: 403,
+        description: 'Acesso negado - Você só pode ver seu próprio perfil'
+    })
+    @ApiResponse({
         status: 404,
         description: 'Usuário não encontrado'
     })
@@ -101,7 +112,11 @@ export class UsersController {
         status: 401,
         description: 'Não autorizado'
     })
-    findOne(@Param('id') id: string) {
+    findOne(@Param('id') id: string, @Request() req) {
+        // Usuário pode ver apenas seu próprio perfil, admin pode ver qualquer um
+        if (req.user.sub !== id && req.user.role !== 'admin') {
+            throw new ForbiddenException('Você só pode visualizar seu próprio perfil');
+        }
         return this.usersService.findOne(id);
     }
 
@@ -110,7 +125,7 @@ export class UsersController {
     @ApiBearerAuth('JWT-auth')
     @ApiOperation({
         summary: 'Atualizar usuário',
-        description: 'Atualiza dados de um usuário existente. Requer autenticação.'
+        description: 'Atualiza dados de um usuário. Usuários podem editar apenas seu próprio perfil. Admins podem editar qualquer perfil.'
     })
     @ApiParam({
         name: 'id',
@@ -123,6 +138,10 @@ export class UsersController {
         description: 'Usuário atualizado com sucesso'
     })
     @ApiResponse({
+        status: 403,
+        description: 'Acesso negado - Você só pode editar seu próprio perfil'
+    })
+    @ApiResponse({
         status: 404,
         description: 'Usuário não encontrado'
     })
@@ -133,16 +152,22 @@ export class UsersController {
     update(
         @Param('id') id: string,
         @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
+        @Request() req,
     ) {
+        // Usuário pode editar apenas seu próprio perfil, admin pode editar qualquer um
+        if (req.user.sub !== id && req.user.role !== 'admin') {
+            throw new ForbiddenException('Você só pode editar seu próprio perfil');
+        }
         return this.usersService.update(id, updateUserDto);
     }
 
     @Delete(':id')
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
     @ApiBearerAuth('JWT-auth')
     @ApiOperation({
-        summary: 'Deletar usuário',
-        description: 'Remove um usuário do sistema. Requer autenticação.'
+        summary: 'Deletar usuário (ADMIN)',
+        description: 'Remove um usuário do sistema. APENAS ADMINISTRADORES podem deletar usuários.'
     })
     @ApiParam({
         name: 'id',
@@ -152,6 +177,10 @@ export class UsersController {
     @ApiResponse({
         status: 200,
         description: 'Usuário deletado com sucesso'
+    })
+    @ApiResponse({
+        status: 403,
+        description: 'Acesso negado - Apenas administradores'
     })
     @ApiResponse({
         status: 404,

@@ -129,3 +129,39 @@ Após iniciar a API, acesse:
 6. Agora você pode testar endpoints protegidos!
 
 ---
+
+## 👤 Usuário Padrão (Admin)
+
+A aplicação cria automaticamente um **usuário administrador** na primeira execução.
+
+### 📋 Credenciais Padrão
+
+As credenciais são configuradas via variáveis de ambiente no arquivo `.env`:
+
+```
+DEFAULT_ADMIN_EMAIL=admin@gdash.com
+DEFAULT_ADMIN_PASSWORD=admin123
+DEFAULT_ADMIN_NAME=Admin GDASH
+```
+
+### 🔑 Como fazer login:
+
+Use as seguintes credenciais no endpoint `POST /auth/login`:
+
+```json
+{
+  "email": "admin@gdash.com",
+  "password": "admin123"
+}
+```
+
+> ⚠️ **IMPORTANTE**: Altere a senha padrão em ambiente de produção!
+
+### ✅ Comportamento:
+
+- ✅ Usuário é criado automaticamente ao iniciar a API
+- ✅ Se o usuário já existir, não será recriado
+- ✅ Logs informam se o usuário foi criado ou já existe
+- ✅ Credenciais são configuráveis via `.env`
+
+---

@@ -80,25 +80,7 @@ Content-Type: application/json
   "password": "123"
 }
 
-###
 
-# ℹ️ NOTAS SOBRE SOLID:
-# 
-# S - Single Responsibility: Cada classe tem uma responsabilidade
-#     - CreateUserDto: apenas valida dados de entrada
-#     - UsersService: apenas gerencia usuários
-#     - UsersController: apenas gerencia rotas HTTP
-#
-# O - Open/Closed: UpdateUserDto estende sem modificar
-# 
-# L - Liskov Substitution: Model<User> pode ser substituído por mock nos testes
-# 
-# I - Interface Segregation: Usamos apenas métodos necessários
-# 
-# D - Dependency Inversion: UsersService depende de abstração (Model<User>)
-#
-# 🧪 TDD: Todos os métodos têm testes escritos ANTES da implementação
-# Execute: npm test -- users.service.spec.ts
 
 ###############################################
 # 🔐 AUTENTICAÇÃO JWT
@@ -112,8 +94,8 @@ POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "email": "joao2@example.com",
-  "password": "senha123"
+  "email": "admin@gdash.com",
+  "password": "admin123"
 }
 
 ###
@@ -186,18 +168,5 @@ Content-Type: application/json
   "password": "qualquersenha"
 }
 
-###
 
-# ℹ️ FLUXO DE AUTENTICAÇÃO:
-# 
-# 1. Criar usuário: POST /users (público)
-# 2. Fazer login: POST /auth/login → recebe { access_token, user }
-# 3. Guardar token no localStorage do frontend
-# 4. Enviar token em todas as requisições: Authorization: Bearer <token>
-# 5. Backend valida token automaticamente via JwtAuthGuard
-# 6. Se válido: request.user contém dados do usuário
-# 7. Se inválido/expirado: retorna 401 Unauthorized
-#
-# 🔒 Rotas protegidas: GET/PATCH/DELETE /users/*
-# 🌍 Rotas públicas: POST /users, POST /auth/login
 

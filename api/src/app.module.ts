@@ -6,6 +6,8 @@ import { AppService } from './app.service';
 import { WeatherModule } from './weather/weather.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { SeedModule } from './seed/seed.module';
+import { PokemonModule } from './pokemon/pokemon.module';
 
 @Module({
   imports: [
@@ -14,8 +16,11 @@ import { AuthModule } from './auth/auth.module';
     WeatherModule,
     UsersModule,
     AuthModule,
+    SeedModule,
+    PokemonModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule { }
+

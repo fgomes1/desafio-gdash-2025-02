@@ -6,9 +6,8 @@ import { Weather } from './entities/weather.entity';
 
 @Injectable()
 export class WeatherService {
-  
-  // Injeção de Dependência do Model do Mongoose
-  constructor(@InjectModel(Weather.name) private weatherModel: Model<Weather>) {}
+
+  constructor(@InjectModel(Weather.name) private weatherModel: Model<Weather>) { }
 
   async create(createWeatherDto: CreateWeatherDto) {
     const createdWeather = new this.weatherModel(createWeatherDto);
@@ -16,8 +15,22 @@ export class WeatherService {
   }
 
   findAll() {
-    return this.weatherModel.find().exec();
+    return this.weatherModel.find().sort({ createdAt: -1 }).exec();
   }
 
-  // Pode apagar os métodos findOne, update e remove por enquanto se quiser
+  async findByDateRange(days: number = 30) {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    return this.weatherModel
+      .find({
+        createdAt: { $gte: startDate }
+      })
+      .sort({ createdAt: -1 })
+      .exec();
+  }
+
+  async count() {
+    return this.weatherModel.countDocuments().exec();
+  }
 }
