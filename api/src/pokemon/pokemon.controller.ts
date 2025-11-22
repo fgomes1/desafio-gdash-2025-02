@@ -1,7 +1,10 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { PokemonService } from './pokemon.service';
 import { WeatherService } from '../weather/weather.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('pokemon')
 @Controller('pokemon')
@@ -130,5 +133,66 @@ export class PokemonController {
     })
     async getPokemonById(@Param('id') id: string) {
         return this.pokemonService.getPokemonById(id);
+    }
+
+    @Get('cache/stats')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
+    @ApiBearerAuth('JWT-auth')
+    @ApiOperation({
+        summary: 'Estatísticas do cache (ADMIN)',
+        description: 'Retorna métricas de performance do cache (hits, misses, taxa de acerto). Apenas administradores.'
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Estatísticas do cache',
+        schema: {
+            example: {
+                keys: 15,
+                hits: 42,
+                misses: 10,
+                hitRate: '80.77%'
+            }
+        }
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'Não autorizado - Token inválido ou ausente'
+    })
+    @ApiResponse({
+        status: 403,
+        description: 'Acesso negado - Apenas administradores'
+    })
+    getCacheStats() {
+        return this.pokemonService.getCacheStats();
+    }
+
+    @Get('cache/clear')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
+    @ApiBearerAuth('JWT-auth')
+    @ApiOperation({
+        summary: 'Limpar cache (ADMIN)',
+        description: 'Remove todos os itens do cache manualmente. Apenas administradores. Útil para forçar atualização de dados.'
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Cache limpo com sucesso',
+        schema: {
+            example: {
+                message: 'Cache limpo com sucesso'
+            }
+        }
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'Não autorizado - Token inválido ou ausente'
+    })
+    @ApiResponse({
+        status: 403,
+        description: 'Acesso negado - Apenas administradores'
+    })
+    clearCache() {
+        return this.pokemonService.clearCache();
     }
 }

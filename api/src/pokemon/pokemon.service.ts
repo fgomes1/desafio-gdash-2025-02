@@ -1,12 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import axios from 'axios';
+import NodeCache from 'node-cache';
 
 @Injectable()
 export class PokemonService {
     private genAI: GoogleGenerativeAI;
     private model: any;
+    private cache: NodeCache;
+    private readonly logger = new Logger(PokemonService.name);
 
     constructor(private configService: ConfigService) {
         const apiKey = this.configService.get<string>('GEMINI_API_KEY');
@@ -15,14 +18,36 @@ export class PokemonService {
         }
         this.genAI = new GoogleGenerativeAI(apiKey);
         this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+        // Configuração do cache
+        this.cache = new NodeCache({
+            stdTTL: 600,           // 10 minutos de expiração
+            checkperiod: 120,      // Verifica itens expirados a cada 2 minutos
+            useClones: false,      // Não clonar objetos (mais rápido)
+        });
+
+        this.logger.log('🎮 PokemonService inicializado com cache (TTL: 10min)');
     }
 
     async getPokemonById(id: string | number) {
+        const cacheKey = `pokemon_${id}`;
+
+        // Verifica cache
+        const cached = this.cache.get(cacheKey);
+        if (cached) {
+            this.logger.debug(`✅ Cache HIT: ${id}`);
+            this.logCacheStats();
+            return cached;
+        }
+
+        // Cache MISS - busca da PokéAPI
+        this.logger.debug(`❌ Cache MISS: ${id} - buscando da PokéAPI...`);
+
         try {
             const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${id}`);
             const data = response.data;
 
-            return {
+            const pokemonData = {
                 id: data.id,
                 name: data.name,
                 height: data.height,
@@ -39,9 +64,39 @@ export class PokemonService {
                 })),
                 abilities: data.abilities.map((a: any) => a.ability.name),
             };
+
+            // Salva no cache
+            this.cache.set(cacheKey, pokemonData);
+            this.logger.log(`💾 Cached: ${id}`);
+            this.logCacheStats();
+
+            return pokemonData;
         } catch (error) {
             throw new Error(`Pokémon não encontrado: ${id}`);
         }
+    }
+
+    private logCacheStats() {
+        const stats = this.cache.getStats();
+        this.logger.debug(`📊 Cache: ${stats.keys} itens | Hits: ${stats.hits} | Misses: ${stats.misses}`);
+    }
+
+    getCacheStats() {
+        const stats = this.cache.getStats();
+        return {
+            keys: stats.keys,
+            hits: stats.hits,
+            misses: stats.misses,
+            hitRate: stats.hits + stats.misses > 0
+                ? ((stats.hits / (stats.hits + stats.misses)) * 100).toFixed(2) + '%'
+                : '0%',
+        };
+    }
+
+    clearCache() {
+        this.cache.flushAll();
+        this.logger.warn('🗑️ Cache limpo manualmente');
+        return { message: 'Cache limpo com sucesso' };
     }
 
     async suggestPokemonByWeather(weatherData: any) {
