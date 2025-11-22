@@ -73,16 +73,17 @@ go mod tidy
 go run main.go
 ```
 
-### 6. Rodando a API (NestJS) 🦁
+## 🦁 Rodando a API (NestJS)
 
 O backend é responsável por receber os dados tratados do Worker, persistir no MongoDB e expor endpoints para o Frontend.
 
-#### 📋 Configuração
+### 📋 Configuração
 
 1. **Acesse a pasta da API:**
    ```bash
    cd api
   ```
+  
   ```bash
   npm install
   ```
@@ -92,3 +93,39 @@ O backend é responsável por receber os dados tratados do Worker, persistir no 
    npm run start:dev
   ```
   
+A API estará rodando em: **http://localhost:3000**
+
+---
+
+## 📚 Documentação da API (Swagger)
+
+A API possui documentação interativa completa usando **Swagger/OpenAPI**.
+
+### 🔗 Acessar Swagger
+
+Após iniciar a API, acesse:
+
+- **Swagger UI**: http://localhost:3000/api
+- **JSON Schema**: http://localhost:3000/api-json
+
+### 🎯 Funcionalidades do Swagger
+
+- ✅ Visualizar todos os endpoints disponíveis
+- ✅ Testar endpoints diretamente no navegador
+- ✅ Ver exemplos de request/response
+- ✅ Autenticar usando JWT (botão "Authorize")
+- ✅ Documentação organizada por tags:
+  - **auth**: Login e autenticação
+  - **users**: CRUD de usuários
+  - **weather**: Dados climáticos e insights de IA
+
+### 🔐 Como testar com autenticação:
+
+1. Acesse http://localhost:3000/api
+2. Execute o endpoint `POST /auth/login` com credenciais válidas
+3. Copie o `access_token` da resposta
+4. Clique no botão **"Authorize"** no topo da página
+5. Cole o token no campo de autenticação
+6. Agora você pode testar endpoints protegidos!
+
+---

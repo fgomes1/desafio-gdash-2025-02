@@ -1,0 +1,203 @@
+### Testar CRUD de Usuários (Implementado com TDD e SOLID)
+
+# 📚 GUIA: Estes endpoints demonstram princípios de TDD e SOLID
+# Veja o arquivo tdd_solid_guide.md para entender a implementação
+
+###
+
+# ➕ CREATE - Criar novo usuário
+# SOLID - SRP: CreateUserDto valida os dados automaticamente
+POST http://localhost:3000/users
+Content-Type: application/json
+
+{
+  "email": "joao2@example.com",
+  "password": "senha123",
+  "name": "João Silva",
+  "role": "user"
+}
+
+###
+
+# 📋 READ ALL - Listar todos os usuários
+# SOLID - SRP: UsersService tem responsabilidade única de gerenciar usuários
+GET http://localhost:3000/users
+
+###
+
+# 🔍 READ ONE - Buscar usuário específico
+# Substitua ID_DO_USUARIO pelo ID retornado na criação
+GET http://localhost:3000/users/6921076de707e0b30fd671fc
+
+###
+
+# ✏️ UPDATE - Atualizar usuário
+# SOLID - OCP: UpdateUserDto estende CreateUserDto sem modificá-lo
+PATCH http://localhost:3000/users/6921076de707e0b30fd671fc
+Content-Type: application/json
+
+{
+  "name": "João Silva Atualizado"
+}
+
+###
+
+# 🔐 UPDATE PASSWORD - Atualizar senha
+# TDD: Teste garante que senha será hasheada antes de salvar
+PATCH http://localhost:3000/users/ID_DO_USUARIO
+Content-Type: application/json
+
+{
+  "password": "novaSenha456"
+}
+
+###
+
+# 🗑️ DELETE - Deletar usuário
+DELETE http://localhost:3000/users/ID_DO_USUARIO
+
+###
+
+# 🧪 TESTE: Criar usuário com validação
+# Deve falhar: email inválido (class-validator)
+POST http://localhost:3000/users
+Content-Type: application/json
+
+{
+  "email": "email-invalido",
+  "password": "123"
+}
+
+###
+
+# 🧪 TESTE: Criar usuário com senha curta
+# Deve falhar: senha < 6 caracteres (class-validator)
+POST http://localhost:3000/users
+Content-Type: application/json
+
+{
+  "email": "teste@example.com",
+  "password": "123"
+}
+
+###
+
+# ℹ️ NOTAS SOBRE SOLID:
+# 
+# S - Single Responsibility: Cada classe tem uma responsabilidade
+#     - CreateUserDto: apenas valida dados de entrada
+#     - UsersService: apenas gerencia usuários
+#     - UsersController: apenas gerencia rotas HTTP
+#
+# O - Open/Closed: UpdateUserDto estende sem modificar
+# 
+# L - Liskov Substitution: Model<User> pode ser substituído por mock nos testes
+# 
+# I - Interface Segregation: Usamos apenas métodos necessários
+# 
+# D - Dependency Inversion: UsersService depende de abstração (Model<User>)
+#
+# 🧪 TDD: Todos os métodos têm testes escritos ANTES da implementação
+# Execute: npm test -- users.service.spec.ts
+
+###############################################
+# 🔐 AUTENTICAÇÃO JWT
+###############################################
+
+###
+
+# 🔐 LOGIN - Obter token JWT
+# Retorna: { access_token, user }
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "joao2@example.com",
+  "password": "senha123"
+}
+
+###
+
+# 👤 PROFILE - Obter perfil do usuário autenticado
+# ⚠️ REQUER TOKEN: Copie o access_token do login acima
+GET http://localhost:3000/auth/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NjM3NzYwNDMsImV4cCI6MTc2Mzg2MjQ0M30.yDe7xEB4V9VEJGEYceKnrlFxyJwf4coxYW3Rek6jgGk
+
+###
+
+# 📋 READ ALL (PROTEGIDO) - Listar todos os usuários
+# ⚠️ REQUER TOKEN: Esta rota agora está protegida
+GET http://localhost:3000/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NjM3NzYwNDMsImV4cCI6MTc2Mzg2MjQ0M30.yDe7xEB4V9VEJGEYceKnrlFxyJwf4coxYW3Rek6jgGk
+
+###
+
+# 🔍 READ ONE (PROTEGIDO) - Buscar usuário específico
+# ⚠️ REQUER TOKEN
+GET http://localhost:3000/users/6921076de707e0b30fd671fc
+Authorization: Bearer SEU_TOKEN_AQUI
+
+###
+
+# ✏️ UPDATE (PROTEGIDO) - Atualizar usuário
+# ⚠️ REQUER TOKEN
+PATCH http://localhost:3000/users/6921076de707e0b30fd671fc
+Authorization: Bearer SEU_TOKEN_AQUI
+Content-Type: application/json
+
+{
+  "name": "João Silva JWT Protegido"
+}
+
+###
+
+# 🗑️ DELETE (PROTEGIDO) - Deletar usuário
+# ⚠️ REQUER TOKEN
+DELETE http://localhost:3000/users/ID_DO_USUARIO
+Authorization: Bearer SEU_TOKEN_AQUI
+
+###
+
+# 🧪 TESTE: Acessar rota protegida SEM token
+# Deve retornar 401 Unauthorized
+GET http://localhost:3000/users
+
+###
+
+# 🧪 TESTE: Login com senha incorreta
+# Deve retornar 401 Unauthorized
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "joaof@example.com",
+  "password": "senhaErrada"
+}
+
+###
+
+# 🧪 TESTE: Login com email inexistente
+# Deve retornar 401 Unauthorized
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "naoexiste@example.com",
+  "password": "qualquersenha"
+}
+
+###
+
+# ℹ️ FLUXO DE AUTENTICAÇÃO:
+# 
+# 1. Criar usuário: POST /users (público)
+# 2. Fazer login: POST /auth/login → recebe { access_token, user }
+# 3. Guardar token no localStorage do frontend
+# 4. Enviar token em todas as requisições: Authorization: Bearer <token>
+# 5. Backend valida token automaticamente via JwtAuthGuard
+# 6. Se válido: request.user contém dados do usuário
+# 7. Se inválido/expirado: retorna 401 Unauthorized
+#
+# 🔒 Rotas protegidas: GET/PATCH/DELETE /users/*
+# 🌍 Rotas públicas: POST /users, POST /auth/login
+
