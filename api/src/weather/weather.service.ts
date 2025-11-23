@@ -33,4 +33,8 @@ export class WeatherService {
   async count() {
     return this.weatherModel.countDocuments().exec();
   }
+
+  async seedData(data: any[]) {
+    return this.weatherModel.insertMany(data);
+  }
 }

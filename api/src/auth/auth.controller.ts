@@ -38,6 +38,7 @@ export class AuthController {
     })
     @UseGuards(LocalAuthGuard)
     async login(@Body() loginDto: LoginDto, @Request() req) {
+        console.log('DEBUG: req.user in Controller:', req.user);
         return this.authService.login(req.user);
     }
 

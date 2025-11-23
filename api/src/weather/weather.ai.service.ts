@@ -19,16 +19,18 @@ export class WeatherAiService {
 
     async generateInsight(weatherData: any) {
         const prompt = `
-      Aja como um assistente meteorológico útil e breve.
-      Com base nestes dados atuais de Medianeira/PR:
+      Aja como um guia turístico e assistente meteorológico local de Medianeira/PR.
+      Com base nestes dados atuais:
       - Temperatura: ${weatherData.temperature}°C
       - Umidade: ${weatherData.humidity}%
       - Vento: ${weatherData.windSpeed} km/h
       - Chuva: ${weatherData.precipitation} mm
-      - Código Clima: ${weatherData.weatherCode}
-
-      Gere um "Insight do Dia" curto (máximo 2 frases) com uma recomendação prática para a pessoa.
-      . Responda em Português do Brasil. Também indique o que pode fazer no dia em questão na cidade da pessoa.
+      
+      Gere um "Insight do Dia" curto (máximo 3 frases).
+      1. Comente sobre o clima.
+      2. Sugira 2 atividades específicas para fazer em Medianeira/PR hoje (ex: visitar a Praça Angelo Darolt, ir ao CPC Arandurá, tomar um tereré, ficar em casa vendo filme, etc) que combinem com este clima.
+      
+      Seja amigável e use emojis.
     `;
 
         try {

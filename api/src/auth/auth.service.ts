@@ -36,12 +36,14 @@ export class AuthService {
             return null;
         }
 
-        // Converter documento Mongoose para objeto plano
-        const userObject = user.toObject ? user.toObject() : user;
-
-        // Remove senha do objeto antes de retornar
-        const { password: _, ...result } = userObject;
-        return result;
+        // Construir objeto manualmente para garantir que as propriedades existam
+        // e eliminar problemas com o objeto do Mongoose
+        return {
+            _id: user._id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+        };
     }
 
     /**
@@ -58,6 +60,7 @@ export class AuthService {
      * ⏱️ Expiração configurada via JWT_EXPIRES_IN no .env
      */
     async login(user: any) {
+        console.log('DEBUG: User inside login service:', user);
         const payload = {
             email: user.email,
             sub: user._id || user.id,

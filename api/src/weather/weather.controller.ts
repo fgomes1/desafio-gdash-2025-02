@@ -15,6 +15,53 @@ export class WeatherController {
     private readonly exportService: ExportService,
   ) { }
 
+  @Post('seed')
+  @ApiOperation({
+    summary: 'Popular banco com dados fictícios (Seed)',
+    description: 'Cria 24 registros de clima simulando as últimas 24 horas para teste de gráficos'
+  })
+  async seed() {
+    const now = new Date();
+    const records: any[] = [];
+
+    // Gerar dados para as últimas 24 horas
+    for (let i = 23; i >= 0; i--) {
+      const date = new Date(now.getTime() - i * 60 * 60 * 1000); // Voltar i horas
+      const hour = date.getHours();
+
+      // Simulação de temperatura baseada na hora do dia
+      let baseTemp = 25;
+      if (hour >= 4 && hour <= 14) {
+        baseTemp = 18 + ((hour - 4) / 10) * 14; // Sobe de 18 até 32
+      } else if (hour > 14) {
+        baseTemp = 32 - ((hour - 14) / 10) * 8; // Desce de 32 até 24
+      } else {
+        baseTemp = 24 - ((hour + 4) / 8) * 6; // Desce de 24 até 18
+      }
+
+      const temperature = baseTemp + (Math.random() - 0.5) * 2;
+      const humidity = 80 - (temperature - 18) * 2.5 + (Math.random() - 0.5) * 5;
+      const windSpeed = 5 + Math.random() * 15;
+      const precipitation = Math.random() > 0.8 ? Math.random() * 5 : 0;
+
+      const weatherData = {
+        temperature,
+        humidity,
+        precipitation,
+        windSpeed,
+        weatherCode: precipitation > 0 ? 61 : (temperature > 30 ? 0 : 1),
+        location: 'Medianeira/PR',
+        collectedAt: date,
+        createdAt: date // Importante para o sort funcionar corretamente
+      };
+
+      records.push(weatherData);
+    }
+
+    await this.weatherService.seedData(records);
+    return { message: 'Seed realizado com sucesso!', count: records.length };
+  }
+
   @Post()
   @ApiOperation({
     summary: 'Receber dados climáticos do Worker Go',

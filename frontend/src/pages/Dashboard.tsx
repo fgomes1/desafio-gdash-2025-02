@@ -3,6 +3,8 @@ import axios from 'axios';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { LogOut, RefreshCw, Download, Sparkles, Bot, Droplets, Wind, CloudRain, Calendar, AlertCircle } from 'lucide-react';
+import { PokemonInsight } from '@/components/dashboard/PokemonInsight';
+import { WeatherChart } from '@/components/dashboard/WeatherChart';
 
 interface WeatherLog {
     _id: string;
@@ -61,7 +63,7 @@ export function Dashboard() {
             const response = await api.get('/weather/insight', {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setInsight(response.data.insight);
+            setInsight(response.data.text);
         } catch (err) {
             console.error('Erro ao buscar insight:', err);
         } finally {
@@ -96,6 +98,8 @@ export function Dashboard() {
 
     useEffect(() => {
         fetchLogs();
+        const interval = setInterval(fetchLogs, 30000); // Atualiza a cada 30s
+        return () => clearInterval(interval);
     }, []);
 
     useEffect(() => {
@@ -103,6 +107,26 @@ export function Dashboard() {
             fetchInsight();
         }
     }, [logs]);
+
+    const getHourlyLogs = (allLogs: WeatherLog[]) => {
+        const hourlyLogs: WeatherLog[] = [];
+        const seenHours = new Set<string>();
+
+        for (const log of allLogs) {
+            const date = new Date(log.createdAt);
+            // Cria uma chave única para cada hora (ex: "2023-11-23T14")
+            const hourKey = date.toISOString().substring(0, 13);
+
+            if (!seenHours.has(hourKey)) {
+                seenHours.add(hourKey);
+                hourlyLogs.push(log);
+            }
+
+            if (hourlyLogs.length >= 24) break;
+        }
+
+        return hourlyLogs;
+    };
 
     return (
         <div className="min-h-screen bg-gdash-bg text-white">
@@ -181,23 +205,36 @@ export function Dashboard() {
                         </div>
                     )}
 
-                    {/* AI Insight Card */}
-                    {insightLoading ? (
-                        <div className="bg-gradient-to-r from-indigo-900/20 to-purple-900/20 border border-indigo-500/30 rounded-lg p-6 animate-pulse">
-                            <div className="h-6 w-48 bg-slate-700 rounded mb-4"></div>
-                            <div className="h-4 w-full bg-slate-700 rounded mb-2"></div>
-                            <div className="h-4 w-3/4 bg-slate-700 rounded"></div>
+                    {/* Top Section: Chart + Pokemon */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {/* Weather Chart */}
+                        <div className="lg:col-span-2 h-full">
+                            {logs.length > 0 ? (
+                                <WeatherChart data={getHourlyLogs(logs)} />
+                            ) : (
+                                <div className="bg-gdash-card border border-slate-700 rounded-xl p-6 h-full flex items-center justify-center text-slate-400">
+                                    Aguardando dados...
+                                </div>
+                            )}
                         </div>
-                    ) : insight ? (
+
+                        {/* Pokemon Insight */}
+                        <div className="lg:col-span-1 h-full">
+                            <PokemonInsight />
+                        </div>
+                    </div>
+
+                    {/* AI Text Insight */}
+                    {insight && (
                         <div className="bg-gradient-to-r from-indigo-900/20 to-purple-900/20 border border-indigo-500/30 rounded-lg p-6 animate-in fade-in slide-in-from-top-4 duration-500">
-                            <div className="flex items-center text-indigo-400 text-lg mb-4">
+                            <div className="flex items-center text-indigo-400 text-lg mb-2">
                                 <Bot className="w-5 h-5 mr-2" />
                                 Insight IA
                                 <Sparkles className="w-4 h-4 ml-2 text-yellow-400 animate-pulse" />
                             </div>
                             <p className="text-indigo-100 leading-relaxed">{insight}</p>
                         </div>
-                    ) : null}
+                    )}
 
                     {/* Weather Cards Grid */}
                     {loading ? (
@@ -252,7 +289,7 @@ export function Dashboard() {
                                                         <Droplets className="w-4 h-4 mr-1" />
                                                         <span className="text-xs">Umidade</span>
                                                     </div>
-                                                    <span className="font-semibold">{log.humidity}%</span>
+                                                    <span className="font-semibold">{log.humidity.toFixed(1)}%</span>
                                                 </div>
 
                                                 <div className="flex flex-col items-center">
@@ -260,7 +297,7 @@ export function Dashboard() {
                                                         <Wind className="w-4 h-4 mr-1" />
                                                         <span className="text-xs">Vento</span>
                                                     </div>
-                                                    <span className="font-semibold">{log.windSpeed} km/h</span>
+                                                    <span className="font-semibold">{log.windSpeed.toFixed(1)} km/h</span>
                                                 </div>
 
                                                 <div className="flex flex-col items-center">
@@ -268,7 +305,7 @@ export function Dashboard() {
                                                         <CloudRain className="w-4 h-4 mr-1" />
                                                         <span className="text-xs">Chuva</span>
                                                     </div>
-                                                    <span className="font-semibold">{log.precipitation} mm</span>
+                                                    <span className="font-semibold">{log.precipitation.toFixed(1)} mm</span>
                                                 </div>
                                             </div>
                                         </div>
