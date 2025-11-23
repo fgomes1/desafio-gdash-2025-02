@@ -107,6 +107,7 @@ func main() {
 
 	go func() {
 		for d := range msgs {
+			log.Printf("📨 Mensagem recebida da fila!")
 			var data WeatherFromQueue
 			err := json.Unmarshal(d.Body, &data)
 
