@@ -1,3 +1,47 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* Default to Dark Mode values since the app is dark-themed */
+    --background: 222 47% 11%; /* #0F172A */
+    --foreground: 210 40% 98%;
+    
+    --card: 215 32% 17%; /* #1E293B */
+    --card-foreground: 210 40% 98%;
+    
+    --popover: 215 32% 17%; /* #1E293B */
+    --popover-foreground: 210 40% 98%;
+    
+    --primary: 158 100% 44%; /* #00E08E */
+    --primary-foreground: 222 47% 11%;
+    
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20.2% 65.1%;
+    
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+    
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 158 100% 44%;
+    
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

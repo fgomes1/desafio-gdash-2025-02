@@ -36,8 +36,11 @@ export class AuthService {
             return null;
         }
 
+        // Converter documento Mongoose para objeto plano
+        const userObject = user.toObject ? user.toObject() : user;
+
         // Remove senha do objeto antes de retornar
-        const { password: _, ...result } = user;
+        const { password: _, ...result } = userObject;
         return result;
     }
 
